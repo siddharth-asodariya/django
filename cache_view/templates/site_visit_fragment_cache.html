@@ -1,0 +1,45 @@
+{% load cache %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      .row {
+        display: flex;
+      }
+      
+      .column {
+        flex: 33.33%;
+        padding: 5px;
+      }
+      .image {
+        height: "100px";
+        width: "100px";
+      }
+    </style>
+  </head>
+  <body>
+	<script src="index.js"></script>
+    This is Site Count = {{visited_count}}
+
+    {% comment %} The fragment is cached forever if timeout is None.  {% endcomment %}
+    <p>Image of Galaxy name : {{image_name}}</p>
+    <div class="row">
+      <div class="column">
+        {% cache 60 menu_items %}
+            <p>One of cached Image of Galaxy: {{image_name}}</p>
+            <image src="{% static image_name %}" alt="Galaxy Image" height="500px" width="500px">
+        {% endcache %}
+      </div>
+      <div class="column">
+        <p>One of Image of Galaxy: {{image_name}}</p>
+        <image src="{% static image_name %}" alt="Galaxy Image" height="500px" width="500px">
+      </div>
+    </div>
+  </body>
+</html>

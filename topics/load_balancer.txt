@@ -1,0 +1,4 @@
+Never drive the https traffic from Django. Use Nginx or Load balancer to do it.
+To serve the ssl traffic from Django we should put nginx ahead of it or use cloud load balancer.
+Django servers are not well optimized to decrypt and encrypt the ssl certificates. nginx and cloud load balaners has built in support 
+for it and they are well optimized to support it.

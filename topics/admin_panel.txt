@@ -1,0 +1,252 @@
+Add attribute columns in the model object list
+Link between model objects
+Add filters to the model object list
+Make model object lists searchable
+Modify the object edit forms
+Override Django admin templates
+
+
+"admin:%(app)s_%(model)s_%(page)"
+This name structure breaks down as follows:
+
+admin: is the namespace.
+app is the name of the app.
+model is the model object.
+page is the Django admin page type.
+
+Change list	%(app)s\_%(model)s\_changelist	Model object page list
+Add	%(app)s\_%(model)s\_add	Object creation page
+History	%(app)s\_%(model)s\_history	Object change history page
+Takes an object_id as a parameter
+Delete	%(app)s\_%(model)s\_delete	Object delete page
+Takes an object_id as a parameter
+Change	%(app)s\_%(model)s\_change	Object edit page
+
+Takes an object_id as a parameter
+
+
+--------------------------Changing How Models Are Edited--------------
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    fields = ("first_name", "last_name", "courses")
+# ...
+
+ModelAdmin.get_form() is responsible for creating the ModelForm for your object. You can override this method to change the form. Add the following method to PersonAdmin:
+
+def get_form(self, request, obj=None, **kwargs):
+    form = super().get_form(request, obj, **kwargs)
+    form.base_fields["first_name"].label = "First Name (Humans only!):"
+    return form
+
+
+from django import forms
+
+class PersonAdminForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        fields = "__all__"
+
+    def clean_first_name(self):
+        if self.cleaned_data["first_name"] == "Spike":
+            raise forms.ValidationError("No Vampires")
+
+        return self.cleaned_data["first_name"]
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    form = PersonAdminForm
+# ...
+
+
+.../site-packages/django/contrib/admin/templates/
+│
+├── admin/
+│   │
+│   ├── auth/
+│   │   └── user/
+│   │       ├── add_form.html
+│   │       └── change_password.html
+│   │
+│   ├── edit_inline/
+│   │   ├── stacked.html
+│   │   └── tabular.html
+│   │
+│   ├── includes/
+│   │   ├── fieldset.html
+│   │   └── object_delete_summary.html
+│   │
+│   ├── widgets/
+│   │   ├── clearable_file_input.html
+│   │   ├── foreign_key_raw_id.html
+│   │   ├── many_to_many_raw_id.html
+│   │   ├── radio.html
+│   │   ├── related_widget_wrapper.html
+│   │   ├── split_datetime.html
+│   │   └── url.html
+│   │
+│   ├── 404.html
+│   ├── 500.html
+│   ├── actions.html
+│   ├── app_index.html
+│   ├── base.html
+│   ├── base_site.html
+│   ├── change_form.html
+│   ├── change_form_object_tools.html
+│   ├── change_list.html
+│   ├── change_list_object_tools.html
+│   ├── change_list_results.html
+│   ├── date_hierarchy.html
+│   ├── delete_confirmation.html
+│   ├── delete_selected_confirmation.html
+│   ├── filter.html
+│   ├── index.html
+│   ├── invalid_setup.html
+│   ├── login.html
+│   ├── object_history.html
+│   ├── pagination.html
+│   ├── popup_response.html
+│   ├── prepopulated_fields_js.html
+│   ├── search_form.html
+│   └── submit_line.html
+│
+└── registration/
+    ├── logged_out.html
+    ├── password_change_done.html
+    ├── password_change_form.html
+    ├── password_reset_complete.html
+    ├── password_reset_confirm.html
+    ├── password_reset_done.html
+    ├── password_reset_email.html
+    └── password_reset_form.html
+
+
+
+
+Permission names follow a very specific naming convention: <app>.<action>_<modelname>.
+
+Let’s break that down:
+
+<app> is the name of the app. For example, the User model is imported from the auth app (django.contrib.auth).
+<action> is one of the actions above (add, delete, change, or view).
+<modelname> is the name of the model, in all lowercase letters.
+
+
+>>> from django.contrib.auth.models import User
+>>> u = User.objects.create_user(username='haki')
+>>> u.has_perm('auth.change_user')
+False
+
+It’s worth mentioning that .has_perm() will always return True for active superuser, even if the permission doesn’t really exist:
+
+
+
+
+>>> u = User.objects.get(username="sidd")
+>>> u.has_perm
+<bound method PermissionsMixin.has_perm of <User: sidd>>
+>>> u.has_perm('admin_add_restaurant')
+False
+
+
+
+>>> from django.contrib import auth
+>>> auth.get_backends()
+[<django.contrib.auth.backends.ModelBackend object at 0x7f10730a8f10>]
+>>> auth.get_backends()[0]
+<django.contrib.auth.backends.ModelBackend object at 0x7f1073055ba0>
+>>> auth.get_backends()[0].has_perm(u, 'cache.view_place')
+False
+
+>>> User.objects.create_superuser(username="siddh", password = "Siddh@123")
+<User: siddh>
+
+>>> dir(s2)
+['DoesNotExist', 'EMAIL_FIELD', 'Meta', 'MultipleObjectsReturned', 'REQUIRED_FIELDS', 'USERNAME_FIELD', '__class__', '__delattr__', '__dict__', '__dir__', 
+'__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', 
+'__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__str__', '__subclasshook__', 
+'__weakref__', '_check_column_name_clashes', '_check_constraints', '_check_default_pk', '_check_field_name_clashes', '_check_fields', '_check_id_field', 
+'_check_index_together', '_check_indexes', '_check_local_fields', '_check_long_column_names', '_check_m2m_through_same_relationship', '_check_managers', 
+'_check_model', '_check_model_name_db_lookup_clashes', '_check_ordering', '_check_property_name_related_field_accessor_clashes', '_check_single_primary_key',
+ '_check_swappable', '_check_unique_together', '_do_insert', '_do_update', '_get_FIELD_display', '_get_expr_references', '_get_field_value_map', 
+ '_get_next_or_previous_by_FIELD', '_get_next_or_previous_in_order', '_get_pk_val', '_get_unique_checks', '_group_perm_cache', '_meta', '_password', 
+ '_perform_date_checks', '_perform_unique_checks', '_perm_cache', '_prepare_related_fields_for_save', '_save_parents', '_save_table', '_set_pk_val', 
+ '_state', '_user_perm_cache', 'check', 'check_password', 'clean', 'clean_fields', 'date_error_message', 'date_joined', 'delete', 'email', 'email_user', 
+ 'first_name', 'from_db', 'full_clean', 'get_all_permissions', 'get_constraints', 'get_deferred_fields', 'get_email_field_name', 'get_full_name', 
+ 'get_group_permissions', 'get_next_by_date_joined', 'get_previous_by_date_joined', 'get_session_auth_hash', 'get_short_name', 'get_user_permissions', 
+ 'get_username', 'groups', 'has_module_perms', 'has_perm', 'has_perms', 'has_usable_password', 'id', 'is_active', 'is_anonymous', 'is_authenticated', 
+ 'is_staff', 'is_superuser', 'last_login', 'last_name', 'logentry_set', 'natural_key', 'normalize_username', 'objects', 'password', 'pk', 
+ 'prepare_database_save', 'refresh_from_db', 'save', 'save_base', 'serializable_value', 'set_password', 'set_unusable_password', 'unique_error_message', 
+ 'user_permissions', 'username', 'username_validator', 'validate_constraints', 'validate_unique']
+
+
+ >>> [print(i) for i in s2.get_group_permissions()]
+auth.delete_group
+auth.delete_user
+silk.delete_response
+silk.delete_profile
+admin.add_logentry
+contenttypes.change_contenttype
+auth.view_permission
+auth.add_user
+contenttypes.add_contenttype
+cache_view.change_sitevisit
+cache_view.delete_amenity
+cache_view.change_amenity
+cache_view.change_place
+auth.delete_permission
+auth.change_permission
+silk.view_profile
+auth.view_user
+contenttypes.view_contenttype
+sessions.add_session
+cache_view.change_restaurant
+admin.delete_logentry
+cache_view.view_restaurant
+auth.add_group
+contenttypes.delete_contenttype
+silk.add_request
+sessions.change_session
+silk.add_response
+cache_view.view_amenity
+cache_view.delete_waiter
+silk.change_response
+silk.view_request
+cache_view.add_waiter
+silk.change_request
+cache_view.delete_restaurant
+silk.delete_request
+admin.view_logentry
+cache_view.add_sitevisit
+auth.change_group
+admin.change_logentry
+cache_view.add_amenity
+sessions.delete_session
+cache_view.delete_sitevisit
+silk.add_profile
+silk.change_profile
+silk.add_sqlquery
+silk.change_sqlquery
+auth.change_user
+auth.view_group
+cache_view.add_place
+sessions.view_session
+silk.view_response
+cache_view.delete_place
+silk.view_sqlquery
+cache_view.view_waiter
+cache_view.add_restaurant
+auth.add_permission
+cache_view.change_waiter
+silk.delete_sqlquery
+cache_view.view_sitevisit
+cache_view.view_place
+[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+>>>     
+
+
+
+To enforce permissions in templates, you can access the current user permissions through a special template variable called perms. For example, if you want to show a delete button only to users with delete permission, then do the following:
+
+{% if perms.auth.delete_user %}
+<button>Delete user!</button>
+{% endif %}

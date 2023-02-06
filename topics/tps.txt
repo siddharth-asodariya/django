@@ -1,0 +1,79 @@
+Use Docker for the development and deployments.
+Ideally develoment and production machine should be identical.
+Docker creates the identical environment between development and production.
+
+Never run django in Debug = True mode on production.
+If debug is mode is True in Django then Django does debugging logs and runs utilities to capture debug insights.
+Debug mode degrades the performance of the application.
+
+
+Read Django Development Philosophies
+https://docs.djangoproject.com/en/3.2/misc/design-philosophies/
+Django framework has philosophies or guiding principles for the development.
+It must be read to understand the logic and reason behind the design and architecture of Django.
+It can make developer to better developer and decision making can be precise.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

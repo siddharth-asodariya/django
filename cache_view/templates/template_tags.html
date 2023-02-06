@@ -1,0 +1,25 @@
+{% autoescape on %}
+    {{ body }}
+{% endautoescape %}
+
+
+{% comment "Optional note" %}
+    <p>Commented out text with {{ create_date|date:"c" }}</p>
+    comment tags cannot be nested.
+{% endcomment %}
+
+
+{% for o in some_list %}
+    <tr class="{% cycle 'row1' 'row2' %}">
+        ...
+    </tr>
+    {% comment %} Produces one of its arguments each time this tag is encountered. The first argument is produced on the first encounter,
+     the second argument on the second encounter, and so forth. Once all arguments are exhausted, 
+     the tag cycles to the first argument and produces it again. {% endcomment %}
+{% endfor %}
+
+
+
+
+
+

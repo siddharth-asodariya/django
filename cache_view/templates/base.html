@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="canonical" href="{% block canonical_url %}{% endblock %}{{ request.get_full_path }}">
+  </head>
+  <body>
+	<script src="index.js"></script>
+    <b>Home Page</b><br>
+
+    URL --- ><br><br>
+    {{ request.path }}  #  -without GET parameters <br>
+    {{ request.get_full_path }}  # - with GET parameters<br><br><br>
+    <a href={% url "cache-test" %}>Cache function view</a><br>
+    <a href={% url "fragment-cache-test" %}>Cache fragment view</a><br>
+    <a href={% url "db-call-count" %}>"db query call count"</a><br>
+    <a href={% url "use_iterator" %}>use_iterator on query view</a><br>
+    <a href={% url "bulk_query" %}>bulk_query</a><br>
+    <a href={% url "csv_response" %}>csv_response</a><br>
+    {% comment %} <a href={% url "get_query_profiled_data" %}>get_query_profiled_data</a><br> {% endcomment %}
+  </body>
+</html>

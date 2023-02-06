@@ -1,0 +1,74 @@
+Creates an index (B-Tree) in the database.
+https://github.com/darold/pgbadger 
+Tools such as pgbadger can be used to analyse the query pattern on the production.
+
+python3 manage.py dbshell
+.tables
+.schema --indent cache_view_waiter
+
+# CREATE TABLE IF NOT EXISTS "cache_view_waiter"(
+#   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+#   "restaurant_id" bigint NOT NULL REFERENCES "cache_view_restaurant"("place_id") DEFERRABLE INITIALLY DEFERRED,
+#   "name" varchar(50) NOT NULL
+# );
+# CREATE INDEX "cache_view_waiter_restaurant_id_164b7973" ON "cache_view_waiter"(
+#   "restaurant_id"
+# );
+# CREATE INDEX "cache_view_waiter_name_0d39aa37" ON "cache_view_waiter"("name");
+
+sqlite> explain select * from cache_view_waiter where name="abc";
+addr  opcode         p1    p2    p3    p4             p5  comment      
+----  -------------  ----  ----  ----  -------------  --  -------------
+0     Init           0     13    0                    0   Start at 13
+1     OpenRead       0     35    0     3              0   root=35 iDb=0; cache_view_waiter
+2     OpenRead       1     44    0     k(2,,)         2   root=44 iDb=0; cache_view_waiter_name_0d39aa37
+3     String8        0     1     0     abc            0   r[1]='abc'
+4     SeekGE         1     12    1     1              0   key=r[1]
+5       IdxGT          1     12    1     1              0   key=r[1]
+6       DeferredSeek   1     0     0                    0   Move 0 to 1.rowid if needed
+7       IdxRowid       1     2     0                    0   r[2]=rowid
+8       Column         0     1     3                    0   r[3]=cache_view_waiter.restaurant_id
+9       Column         1     0     4                    0   r[4]=cache_view_waiter.name
+10      ResultRow      2     3     0                    0   output=r[2..4]
+11    Next           1     5     1                    0   
+12    Halt           0     0     0                    0   
+13    Transaction    0     0     79    0              1   usesStmtJournal=0
+14    Goto           0     1     0                    0   
+sqlite> explain select * from cache_view_waiter where name="abcd";
+addr  opcode         p1    p2    p3    p4             p5  comment      
+----  -------------  ----  ----  ----  -------------  --  -------------
+0     Init           0     13    0                    0   Start at 13
+1     OpenRead       0     35    0     3              0   root=35 iDb=0; cache_view_waiter
+2     OpenRead       1     44    0     k(2,,)         2   root=44 iDb=0; cache_view_waiter_name_0d39aa37
+3     String8        0     1     0     abcd           0   r[1]='abcd'
+4     SeekGE         1     12    1     1              0   key=r[1]
+5       IdxGT          1     12    1     1              0   key=r[1]
+6       DeferredSeek   1     0     0                    0   Move 0 to 1.rowid if needed
+7       IdxRowid       1     2     0                    0   r[2]=rowid
+8       Column         0     1     3                    0   r[3]=cache_view_waiter.restaurant_id
+9       Column         1     0     4                    0   r[4]=cache_view_waiter.name
+10      ResultRow      2     3     0                    0   output=r[2..4]
+11    Next           1     5     1                    0   
+12    Halt           0     0     0                    0   
+13    Transaction    0     0     79    0              1   usesStmtJournal=0
+14    Goto           0     1     0                    0   
+sqlite> explain select * from cache_view_place where state="gujarat";
+addr  opcode         p1    p2    p3    p4             p5  comment      
+----  -------------  ----  ----  ----  -------------  --  -------------
+0     Init           0     14    0                    0   Start at 14
+1     OpenRead       0     45    0     6              0   root=45 iDb=0; cache_view_place
+2     Rewind         0     13    0                    0   
+3       Column         0     5     1                    0   r[1]=cache_view_place.state
+4       Ne             2     12    1     BINARY-8       82  if r[1]!=r[2] goto 12
+5       Rowid          0     3     0                    0   r[3]=rowid
+6       Column         0     1     4                    0   r[4]=cache_view_place.name
+7       Column         0     2     5                    0   r[5]=cache_view_place.address
+8       Column         0     3     6                    0   r[6]=cache_view_place.city
+9       Column         0     4     7                    0   r[7]=cache_view_place.email
+10      Column         0     5     8                    0   r[8]=cache_view_place.state
+11      ResultRow      3     6     0                    0   output=r[3..8]
+12    Next           0     3     0                    1   
+13    Halt           0     0     0                    0   
+14    Transaction    0     0     79    0              1   usesStmtJournal=0
+15    String8        0     2     0     gujarat        0   r[2]='gujarat'
+16    Goto           0     1     0                    0   
