@@ -275,3 +275,17 @@ def user_info(request):
     """
 
     return HttpResponse(text, content_type="text/plain")
+
+
+def template_tag_view(request):
+    """use different default and custom tag in html page"""
+    context = {
+        "some_list": [1,2,3,4,5,6,7,8,9,10],
+        "data":{"items": (("Sidd","aso"),), "item2": 237},
+        "list123":[1,2,3],
+        "this_value": 175,
+        "max_value": 200,
+        "max_width": 100,
+        "a": "1200303",
+    }
+    return render(request, 'template_tags.html', context=context)

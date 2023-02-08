@@ -1,0 +1,38 @@
+A quick overview¶
+The template system works in a two-step process: compiling and rendering. To define a custom template tag, you specify how the compilation works 
+and how the rendering works.When Django compiles a template, it splits the raw template text into ‘’nodes’’. Each node is an instance of 
+django.template.Node and has a render() method. A compiled template is a list of Node objects. When you call render() on a compiled template object, 
+the template calls render() on each Node in its node list, with the given context. The results are all concatenated together to form the output of 
+the template. Thus, to define a custom template tag, you specify how the raw template tag is converted into a Node (the compilation function), 
+and what the node’s render() method does.
+
+
+'filter_file' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+l10n
+log
+number_formatter
+static
+tz
+
+https://docs.djangoproject.com/en/4.1/howto/custom-template-tags/#a-quick-overview
+
+Filters and auto-escaping¶
+When writing a custom filter, give some thought to how the filter will interact with Django’s auto-escaping behavior. Note that two types of strings can be passed around inside the template code:
+
+Raw strings are the native Python strings. On output, they’re escaped if auto-escaping is in effect and presented unchanged, otherwise.
+
+Safe strings are strings that have been marked safe from further escaping at output time. Any necessary escaping has already been done. They’re commonly used for output that contains raw HTML that is intended to be interpreted as-is on the client side.
+
+Internally, these strings are of type SafeString. You can test for them using code like:
+
+from django.utils.safestring import SafeString
+
+if isinstance(value, SafeString):
+    # Do something with the "safe" string.
+    ...
+

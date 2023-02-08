@@ -12,6 +12,7 @@ from cache_view.views import (
     lazy_example,
     see_request,
     user_info,
+    template_tag_view,
 )
 
 urlpatterns = [
@@ -24,6 +25,7 @@ urlpatterns = [
     path('lazy_example/', lazy_example, name="lazy_example"),
     path("see_request/", see_request),
     path("user_info/", user_info),
+    path("tag/", template_tag_view),
 ]
 
 

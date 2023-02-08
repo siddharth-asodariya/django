@@ -1,3 +1,7 @@
+Loads a custom template tag set.
+{% comment %} {% load somelibrary package.otherlibrary %} {% endcomment %}
+{% load filter_file %}
+
 {% autoescape on %}
     {{ body }}
 {% endautoescape %}
@@ -9,17 +13,159 @@
 {% endcomment %}
 
 
+{% comment %} If you only want to declare the cycle but not produce the first value, you can add a silent keyword as the last keyword in the tag. {% endcomment %}
 {% for o in some_list %}
-    <tr class="{% cycle 'row1' 'row2' %}">
-        ...
+    <tr class="{% cycle 'row1' 'row2' as rowcolors%}">
+        {{o}}       {{rowcolors}}<br>
     </tr>
     {% comment %} Produces one of its arguments each time this tag is encountered. The first argument is produced on the first encounter,
      the second argument on the second encounter, and so forth. Once all arguments are exhausted, 
      the tag cycles to the first argument and produces it again. {% endcomment %}
 {% endfor %}
 
+{% comment %} {% debug %}  {% endcomment %}
+
+{% comment %} dir1/
+    template.html
+    base2.html
+    my/
+        base3.html
+base1.html
+In template.html, the following paths would be valid:
+
+{% extends "./base2.html" %}
+{% extends "../base1.html" %}
+{% extends "./my/base3.html" %} {% endcomment %}
+
+
+{% autoescape off %}
+{% firstof var1 var2 var3 "<strong>fallback value</strong>" %}====
+{% endautoescape %}
+{% firstof var1 var2 var3 "<strong>fallback value</strong>"|safe %}====
+{% if var1 %}
+    {{ var1 }}
+{% elif var2 %}
+    {{ var2 }}
+{% elif var3 %}
+    {{ var3 }}
+{% endif %}
+
+{% comment %} for the dot operator, dictionary key lookup takes precedence over method lookup. {% endcomment %}
+{% comment %} Therefore if the data dictionary contains a key named 'items', data.items will return data['items'] instead of data.items() {% endcomment %}
+{% for key, value in data.items %}
+    {{ key }}: {{ value }}
+{% endfor %}
+
+{% for athlete in athlete_list %}
+    <li>{{ athlete.name }}</li>
+{% empty %}
+    <li>Sorry, no athletes in this list.</li>
+{% endfor %}
+
+{% if athlete_list and coach_list or cheerleader_list %}
+{% comment %} if (athlete_list and coach_list) or cheerleader_list {% endcomment %}
+{% endif %}
+==, !=, <, >, <=, >=, in, not in, is, and is not
+from lowest to highest, is as follows:
+or
+and
+not
+in
+==, !=, <, >, <=, >=
+
+{% if a == b or c == d and e %}
+{%endif%}
+(a == b) or ((c == d) and e)
+
+<h1>Archive for {{ year }}</h1>
+{% for date in days %}
+    {% ifchanged %}<h3>{{ date|date:"F" }}</h3>{% endifchanged %}
+    <a href="{{ date|date:"M/d"|lower }}/">{{ date|date:"j" }}</a>
+{% endfor %}
+
+{% for match in matches %}
+    <div style="background-color:
+        {% ifchanged match.ballot_id %}
+            {% cycle "red" "blue" %}
+        {% else %}
+            gray
+        {% endifchanged %}
+    ">{{ match }}</div>
+{% endfor %}
+
+{% comment %} {% include "name_snippet.html" with person="Jane" greeting="Hello" %}
+{% include "name_snippet.html" with greeting="Hi" only %} {% endcomment %}
+
+{% lorem %}
+{% comment %} {% lorem [count] [method] [random] %} {% endcomment %}
+
+
+It is {% now "jS F Y H:i" %}
+It is the {% now "jS \o\f F" %}
+{% now "Y" as current_year %}
+Copyright {{ current_year }}
+{% comment %} {% blocktranslate %} Copyright {{ current_year }}{% endblocktranslate %} {% endcomment %}
+
+
+{% spaceless %}
+    <p>
+        <a href="foo/">Foo</a>
+    </p>
+{% endspaceless %}
+<p><a href="foo/">Foo</a></p>
+{% comment %} Only space between tags is removed – not space between tags and text. 
+In this example, the space around Hello won’t be stripped {% endcomment %}
+{% spaceless %}
+    <strong>
+        Hello
+    </strong>
+{% endspaceless %}
 
 
 
+{% url 'bulk_query' v1 v2 as the_url %}
+<a href="{{ the_url }}">I'm linking to {{ the_url }}</a>
+
+{% comment %} verbatim¶
+Stops the template engine from rendering the contents of this block tag.
+
+A common use is to allow a JavaScript template layer that collides with Django’s syntax.  {% endcomment %}
+{% verbatim myblock %}
+    Avoid template rendering via the {% verbatim %}{% endverbatim %} block.
+{% endverbatim myblock %}
 
 
+{% widthratio this_value max_value max_width as width %}
+The width is: {{ width }}
+{% comment %} {% blocktranslate %}The width is: {{ width }}{% endblocktranslate %} {% endcomment %}
+Use blocktranslate to pluralize translated strings.
+
+
+Caches a complex variable under a simpler name. This is useful when accessing 
+an “expensive” method (e.g., one that hits the database) multiple times.
+{% with total=business.employees.count %}
+    {{ total }} employee{{ total|pluralize }}
+{% endwith %}
+
+
+try
+{% comment %} {{len(list123)}} {% endcomment %}
+{{ list123|length }}
+
+{{ list123|random }}
+
+
+{{ value|slugify }}
+If value is "Joel is a slug", the output will be "joel-is-a-slug".
+
+
+
+{% load static %}
+<img src="{% static 'images/hi.jpg' %}" alt="Hi!">
+
+<img src="{% get_static_prefix %}images/hi.jpg" alt="Hi!">
+
+<body data-media-url="{% get_media_prefix %}">
+
+<br>
+{{ a|cut:"0" }}
