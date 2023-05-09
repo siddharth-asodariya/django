@@ -181,3 +181,4 @@ dmypy.json
 .idea/
 
 /assets/
+*.json

@@ -8,12 +8,13 @@
 
 
 # Django silk stores response time, route, call profile, sql queries details for each request.
-# should enabled only for needed time only, because it stores the request data into database which over the time creates 
+# should enabled only for needed time only, because it stores the request data into database which over the time creates
 # lots of data blot into database.
 # On production environment we should not use the django silk.
 
 import cProfile
 import re
+
 cProfile.run('re.compile("foo|bar")')
 
 # python -m cProfile [-o output_file] [-s sort_order] (-m module | myscript.py)
@@ -21,4 +22,4 @@ cProfile.run('re.compile("foo|bar")')
 
 # pip install pycallgraph
 
-# pip install tuna  
+# pip install tuna

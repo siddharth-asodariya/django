@@ -14,6 +14,26 @@ It must be read to understand the logic and reason behind the design and archite
 It can make developer to better developer and decision making can be precise.
 
 
+pip install django-db-connection-pool
+Database connection pooling is a way to reduce the cost of opening and closing connections by maintaining a “pool” of open connections that can be passed from database operation to database operation as needed. This way, we are spared the expense of having to open and close a brand new connection for each operation the database is asked to perform.
+
+This is the largest number of connections that will be kept persistently in the pool. Note that the pool begins with no connections; once this number of connections is requested, that number of connections will remain. pool_size can be set to 0 to indicate no size limit; to disable pooling, use a :class: ~sqlalchemy.
+
+ pgbouncer-rr (patched version from Amazon and with more functionalities).
+
+ Manually selecting a database for a QuerySet¶
+You can select the database for a QuerySet at any point in the QuerySet “chain.” Call using() on the QuerySet to get another QuerySet that uses the specified database.
+
+using() takes a single argument: the alias of the database on which you want to run the query. For example:
+
+>>> # This will run on the 'default' database.
+>>> Author.objects.all()
+
+>>> # So will this.
+>>> Author.objects.using('default').all()
+
+>>> # This will run on the 'other' database.
+>>> Author.objects.using('other').all()
 
 
 
@@ -51,6 +71,21 @@ It can make developer to better developer and decision making can be precise.
 
 
 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+
+On each http connection with server at least 2 files opened. It can be increased based on the configuration and setup of the server.
+
+
+https://www.nginx.com/blog/avoiding-top-10-nginx-configuration-mistakes/
+
+
+
+
+https://django-model-utils.readthedocs.io/en/latest/index.html
+
+https://pypi.org/project/django-query-profiler/
+
+https://docs.djangoproject.com/en/3.2/ref/middleware/#module-django.middleware.gzip
 
 
 
@@ -60,20 +95,29 @@ It can make developer to better developer and decision making can be precise.
 
 
 
+https://sentry.io/welcome/
+https://newrelic.com/
 
 
+https://django-extensions.readthedocs.io/en/stable/index.html
+https://www.ansible.com/
+http://www.fabfile.org/
+https://www.chef.io/
 
 
+https://github.com/jazzband/django-silk
 
 
+(patched version from Amazon and with more functionalities)
+https://www.fullstackpython.com/django-utils-functional-lazy-examples.html
 
 
+Uptime — is the amount of time that a website stays up and running. As you can guess 100% is impossible due to unscheduled outages, software and hardware upgrades, and maintenance. Since Web pages can't land visitors since they are down, uptime is very important.
 
+Bandwidth — is the level of traffic and amount of data that can transfer between your site, users, and the Internet.
 
+To put it simple, every page of your website has a weight, e.g. 400Kb. That means, when somebody visits your article, they have to download those 400kb. But imagine you have a bandwidth of 500Kb, but several people need to download those 400Kb at the same time. Thus, your visitors will have to wait. It’s bad for your website.
 
+The higher your bandwidth, the more people can visit your site at the same time and fully enjoy the peak experience you created for them.
 
-
-
-
-
-
+Disk space — is the amount of data you can store on the web server. Every web sites need somewhere to store their files. Obviously, the amount of space needed depends on the size of your website. Thus, disc space, is how much you are LIMITED to uploading to the web server in total.

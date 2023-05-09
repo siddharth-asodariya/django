@@ -3,31 +3,41 @@ import time
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
-from django.db import reset_queries 
+from django.db import reset_queries
+from django.db.models import Q
+from django.urls import reverse
+
 from .utils import query_count_all, create_or_increment_site_count
 from .constant import IMAGE_NAME_LIST
 from .models import SiteVisit, Restaurant, Place
 
-
 # Create your views here.
 def home(request):
     """home page"""
-    context = {
-    }
-    return render(request, 'base.html', context=context)
+    print(
+        Place.objects.filter(name="gwalia purani delhi")
+        .filter(city="Ahmedabad")
+        .values()
+    )
+    print(Place.objects.filter(name="gwalia purani delhi", city="Ahmedabad").values())
+    print(
+        Place.objects.filter(
+            Q(name="gwalia purani delhi") & Q(city="Ahmedabad")
+        ).values()
+    )
+    context = {}
+    return render(request, "base.html", context=context)
 
 
 # Note: Overuse of Data Caching can cause memory issues if data is constantly added and removed to and from the cache.
-#server-side cache-----Data Caching
+# server-side cache-----Data Caching
 @cache_page(60 * 2)
 def test_cache(request):
     """test cache in browser"""
     print("Comes to test_cache view")
     visited_count = create_or_increment_site_count(request.path)
-    context = {
-        "visited_count": visited_count
-    }
-    return render(request, 'site_visit_count.html',context=context)
+    context = {"visited_count": visited_count}
+    return render(request, "site_visit_count.html", context=context)
 
 
 def test_fragment_cache(request):
@@ -38,11 +48,8 @@ def test_fragment_cache(request):
     image_name = IMAGE_NAME_LIST[visited_count % 6]
     print(image_name)
 
-    context = {
-        "visited_count": visited_count,
-        "image_name": image_name
-    }
-    return render(request, 'site_visit_fragment_cache.html',context=context)
+    context = {"visited_count": visited_count, "image_name": image_name}
+    return render(request, "site_visit_fragment_cache.html", context=context)
 
 
 # As the accepted answer says you must consume the queryset first since it's lazy (e.g. list(qs)).
@@ -70,13 +77,13 @@ def db_call_count(request):
     # here multiple cache copies will be created based on the user_instance value.
     # Better performance can be seen once caching is applied at multiple templates and bigger chunks of templates.
 
-    return render(request, 'queries_count.html',context=context)
+    return render(request, "queries_count.html", context=context)
 
 
-#iterator
-# A QuerySet typically caches its results internally so that repeated evaluations do not result in additional queries. In contrast, iterator() will 
-# read results directly, without doing any caching at the QuerySet level (internally, the default iterator calls iterator() and caches the return 
-# value). For a QuerySet which returns a large number of objects that you only need to access once, this can result in better performance and a 
+# iterator
+# A QuerySet typically caches its results internally so that repeated evaluations do not result in additional queries. In contrast, iterator() will
+# read results directly, without doing any caching at the QuerySet level (internally, the default iterator calls iterator() and caches the return
+# value). For a QuerySet which returns a large number of objects that you only need to access once, this can result in better performance and a
 # significant reduction in memory.
 
 
@@ -88,19 +95,18 @@ def use_iterator(request):
     restaurants = Restaurant.objects.filter(serves_pizza=True).iterator()
     # print(restaurants)
     for restaurant in restaurants:
-    #     print("----------------")
+        #     print("----------------")
         print(restaurant.place.name)
         print(restaurant.place.city)
     # # queries_count = query_count_all()
     print(query_count_all())
     # reset_queries()
-    
+
     # restaurants = Restaurant.objects.filter(serves_pizza=True).iterator()
     # print(type(restaurants))
     # for restaurant in restaurants:
     #     print(restaurant.serves_pizza)
     # queries_count1 = query_count_all()
-
 
     # context = {
     #     "visited_count": visited_count,
@@ -110,7 +116,7 @@ def use_iterator(request):
     #     "query_func": query_count_all,
     # }
     # return render(request, 'queries_count.html',context=context)
-    return HttpResponse("NOthignn")
+    return HttpResponse("Nothing")
 
 
 # Restaurant.objects.in_bulk([1])
@@ -183,8 +189,8 @@ def use_iterator(request):
 
 def bulk_query(request):
     """small learning"""
-    Place.objects.all() #queryset
-    Place.objects.values('name', 'city') # dict
+    Place.objects.all()  # queryset
+    Place.objects.values("name", "city")  # dict
     # >>> Place.objects.all()
     # <QuerySet [<Place: gvalia purani delhi the place>, <Place: saffron the place>, <Place: TORITOS the place>, <Place: From the north the place>]>
     # >>> Place.objects.values('name', 'city')
@@ -192,16 +198,16 @@ def bulk_query(request):
 
     # avoid the unnecessary overhead of fetching and mapping the extra columns with the queryset
 
-    Place.objects.values_list('name', 'city') # tuple
+    Place.objects.values_list("name", "city")  # tuple
     # <QuerySet [('gvalia purani delhi', 'ahmedabad'), ('saffron', 'Ahmedabad'), ('TORITOS', 'Ahmedabad'), ('From the north', 'Ahmedabad')]>
     # Whenever, we try to access the other column from the queryset, that column details will be fetched from the database on that specific instance.
 
-    Place.objects.all().defer('name', 'city')[0].name
+    Place.objects.all().defer("name", "city")[0].name
     # 'gvalia purani delhi'
     # >>> connections.all()[0].queries
     # [{'sql': 'SELECT "cache_view_place"."id", "cache_view_place"."address", "cache_view_place"."state", "cache_view_place"."email" FROM "cache_view_place" LIMIT 1', 'time': '0.000'}, {'sql': 'SELECT "cache_view_place"."id", "cache_view_place"."name" FROM "cache_view_place" WHERE "cache_view_place"."id" = 1 LIMIT 21', 'time': '0.000'}]
 
-    Place.objects.all().only('name', 'city')[0].address
+    Place.objects.all().only("name", "city")[0].address
     # >>> Place.objects.all().only('name', 'city')[0].address
     # 'south bopal'
     # >>> connections.all()[0].queries
@@ -210,42 +216,47 @@ def bulk_query(request):
     return HttpResponse("select related and prefetch related.")
 
 
-
 # Use Redis for caching as it is blazzingly faster. It stores all the data into RAM.
-# Redis support lots of data structures which can be helpful to store various kind of data. Make sure to check time complexity of each operation on data structure 
+# Redis support lots of data structures which can be helpful to store various kind of data. Make sure to check time complexity of each operation on data structure
 # before using any data structure.
-# Always try to choose the data structure whose operations we are going to perform are not proposonal to data size. As an example, fetching the value by the 
+# Always try to choose the data structure whose operations we are going to perform are not proposonal to data size. As an example, fetching the value by the
 # key has always O(1) complexity in Redis. It's performance will be consistant in case of any volume.
-# If achieving O(1) is not possible then we can go with the other data structures with nearby lesser complexities. In any case, we should have the fair idea 
+# If achieving O(1) is not possible then we can go with the other data structures with nearby lesser complexities. In any case, we should have the fair idea
 # of the worst case complexities.
 
 
 import csv
 from django.http import StreamingHttpResponse
+
+
 def csv_response(request):
     response = HttpResponse(
-        content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="somefilename.csv"'},
     )
-    writer =csv.writer(response)
-    writer.writerow(['First row', 'Foo', 'Bar', 'Baz'])
-    writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
+    writer = csv.writer(response)
+    writer.writerow(["First row", "Foo", "Bar", "Baz"])
+    writer.writerow(["Second row", "A", "B", "C", '"Testing"', "Here's a quote"])
 
     return response
 
+
 from django.utils.functional import lazy
+
+
 def delaying_fun(sec: int):
     time.sleep(sec)
     return f"Slept enough for {sec} seconds"
 
+
 def lazy_example(request):
-    return HttpResponse(str(lazy(delaying_fun(10))))
+    a = lazy(delaying_fun(10))
+    return HttpResponse(str(a))
+
 
 # Use lazy for the variables which can take time to evalute.
 # lazy function in the django will only evalute the variable value whenever they are being used.
 # Follow the great article to better understand the concept.
-
-
 
 
 def see_request(request):
@@ -262,8 +273,42 @@ def see_request(request):
     return HttpResponse(text, content_type="text/plain")
 
 
+import typing
 
-def user_info(request):
+import requests
+from asgiref.sync import sync_to_async
+
+# Sync to Async
+async def async_with_sync_view(request):
+    loop = asyncio.get_event_loop()
+    async_function = sync_to_async(http_call_sync, thread_sensitive=False)
+    loop.create_task(async_function())
+    return HttpResponse("Non-blocking HTTP request (via sync_to_async)")
+
+
+async def http_call_async():
+    print("inside the function")
+    for num in range(1, 6):
+        await asyncio.sleep(1)
+        print(num)
+        print("comes inside for loop")
+    # async with httpx.AsyncClient() as client:
+    #     r = await client.get("https://httpbin.org/")
+    #     print(r)
+
+
+def http_call_sync():
+    for num in range(1, 6):
+        time.sleep(1)
+        print(num)
+    # r = requests.get("https://httpbin.org/")
+    # print(r)
+
+
+import asyncio
+
+
+async def user_info(request):
     text = f"""
         Selected HttpRequest.user attributes:
 
@@ -273,6 +318,11 @@ def user_info(request):
         is_superuser: {request.user.is_superuser}
         is_active:    {request.user.is_active}
     """
+    loop = asyncio.get_event_loop()
+    loop.create_task(http_call_async())
+    # await http_call_sync()
+    # await asyncio.sleep(10)
+    # time.sleep(10)
 
     return HttpResponse(text, content_type="text/plain")
 
@@ -280,12 +330,12 @@ def user_info(request):
 def template_tag_view(request):
     """use different default and custom tag in html page"""
     context = {
-        "some_list": [1,2,3,4,5,6,7,8,9,10],
-        "data":{"items": (("Sidd","aso"),), "item2": 237},
-        "list123":[1,2,3],
+        "some_list": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "data": {"items": (("Sidd", "aso"),), "item2": 237},
+        "list123": [1, 2, 3],
         "this_value": 175,
         "max_value": 200,
         "max_width": 100,
         "a": "1200303",
     }
-    return render(request, 'template_tags.html', context=context)
+    return render(request, "template_tags.html", context=context)

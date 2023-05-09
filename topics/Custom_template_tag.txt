@@ -1,9 +1,9 @@
 A quick overview¶
-The template system works in a two-step process: compiling and rendering. To define a custom template tag, you specify how the compilation works 
-and how the rendering works.When Django compiles a template, it splits the raw template text into ‘’nodes’’. Each node is an instance of 
-django.template.Node and has a render() method. A compiled template is a list of Node objects. When you call render() on a compiled template object, 
-the template calls render() on each Node in its node list, with the given context. The results are all concatenated together to form the output of 
-the template. Thus, to define a custom template tag, you specify how the raw template tag is converted into a Node (the compilation function), 
+The template system works in a two-step process: compiling and rendering. To define a custom template tag, you specify how the compilation works
+and how the rendering works.When Django compiles a template, it splits the raw template text into ‘’nodes’’. Each node is an instance of
+django.template.Node and has a render() method. A compiled template is a list of Node objects. When you call render() on a compiled template object,
+the template calls render() on each Node in its node list, with the given context. The results are all concatenated together to form the output of
+the template. Thus, to define a custom template tag, you specify how the raw template tag is converted into a Node (the compilation function),
 and what the node’s render() method does.
 
 
@@ -35,4 +35,3 @@ from django.utils.safestring import SafeString
 if isinstance(value, SafeString):
     # Do something with the "safe" string.
     ...
-

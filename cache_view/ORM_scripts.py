@@ -1,7 +1,8 @@
 """ORM scripts"""
 from django.db import connections, reset_queries
 from cache_view.models import Restaurant
-r =Restaurant.objects.all()
+
+r = Restaurant.objects.all()
 r[0].place.amenities.all()
 sum(len(c.queries) for c in connections.all())
 

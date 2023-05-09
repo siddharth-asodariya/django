@@ -1,0 +1,19 @@
+# python3 manage.py dbshell
+.tables
+
+
+select '';
+.print ''
+.schema --indent cache_view_waiter
+
+select '';
+.print 'explain select * from cache_view_waiter where name="abc"'
+explain select * from cache_view_waiter where name="abc";
+
+select '';
+.print 'explain select * from cache_view_waiter where name="abcd"'
+explain select * from cache_view_waiter where name="abcd";
+
+select '';
+.print 'explain select * from cache_view_place where state="gujarat"'
+explain select * from cache_view_place where state="gujarat";
